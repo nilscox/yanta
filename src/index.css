@@ -1,0 +1,23 @@
+html, body, #app {
+  height: 100%;
+  font-weight: 400;
+}
+
+main {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  letter-spacing: initial;
+}
+
+a {
+  color: inherit;
+}
+
+pre {
+  border-color: #999;
+}

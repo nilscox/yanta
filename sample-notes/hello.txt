@@ -1,0 +1,7 @@
+Hello!
+
+This is a demo note. Try to edit it!
+The notes will be saved to your browser's local storage.
+
+Looking for the code? -> https://github.com/nilscox/yanta
+Have a nice day :)
