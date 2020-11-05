@@ -1,6 +1,7 @@
 <template>
+  <settings />
   <note v-if="newNote" path="/" :creating="true" />
-  <main v-if="!newNote">
+  <main v-if="false && !newNote">
     <h1>
       <span class="appname-chunk">yet</span>
       <span class="appname-chunk">another</span>
@@ -18,12 +19,14 @@
 <script>
 import notesMixin from '../../mixins/notes.mixin';
 import Note from '../../components/Note/Note.vue';
+import Settings from './Settings.vue';
 import RecentNote from './RecentNote.vue';
 import NewNote from './NewNote.vue';
 
 export default {
   name: 'Home',
   components: {
+    Settings,
     Note,
     NewNote,
     RecentNote,

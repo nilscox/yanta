@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div v-if="initialized" class="wrapper">
     <sidebar />
     <router-view />
   </div>
@@ -7,9 +7,11 @@
 
 <script>
 import { computed } from 'vue';
+
+import adapters from './adapters';
+
 import Sidebar from './components/Sidebar.vue';
 import IconButton from './components/IconButton.vue';
-import { NotesLocalStorageAdapter } from './adapters/notes-local-storage-adapter';
 
 import data from './data.json';
 
@@ -27,14 +29,20 @@ export default {
     IconButton,
   },
   data() {
+    const Adapter = adapters[localStorage.getItem('adapter') || 'LOCAL_STORAGE'];
+
     return {
-      adapter: new NotesLocalStorageAdapter(data),
+      adapter: new Adapter(data),
       keybindingListeners: [],
       listening: true,
+      initialized: false,
     };
   },
-  mounted() {
+  async mounted() {
     document.body.addEventListener('keyup', this.keyup);
+
+    await this.adapter.init();
+    this.initialized = true;
   },
   unmounted() {
     document.body.removeEventListener('keyup', this.keyup);
@@ -42,6 +50,7 @@ export default {
   provide() {
     return {
       notesAdapter: computed(() => this.adapter),
+      setNotesAdapter: adapter => this.adapter = adapter,
       registerKeybindingListener: this.registerKeybindingListener,
       unregisterKeybindingListener: this.unregisterKeybindingListener,
       setListening: this.setListening,

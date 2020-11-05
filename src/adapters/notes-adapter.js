@@ -13,22 +13,22 @@ const splitFilePath = (path) => {
   ];
 };
 
-export class NotesLocalStorageAdapter {
+export class NotesAdapter {
 
-  constructor(initialData) {
-    const dataJson = window.localStorage.getItem('notes');
-    const data = dataJson ? JSON.parse(dataJson) : initialData;
+  init() {
+    throw new Error('not implemented');
+  }
 
-    if (data) {
-      this.root = new Folder(data, null);
-    } else {
-      this.root = {
-        name: '/',
-        entries: [],
-      };
-    }
+  teardown() {
+    throw new Error('not implemented');
+  }
 
-    this.save();
+  getRootFolder() {
+    throw new Error('not implemented');
+  }
+
+  save() {
+    throw new Error('not implemented');
   }
 
   static getEntryFrom(folder, path) {
@@ -46,23 +46,21 @@ export class NotesLocalStorageAdapter {
       return null;
     }
 
-    return NotesLocalStorageAdapter.getEntryFrom(entry, path.slice(1));
+    return NotesAdapter.getEntryFrom(entry, path.slice(1));
   };
-
-  getRootFolder() {
-    return this.root;
-  }
 
   getEntry(path) {
     if (!path.startsWith('/')) {
       throw new Error('invalid path');
     }
 
+    const root = this.getRootFolder();
+
     if (path === '/') {
-      return this.root;
+      return root;
     }
 
-    return NotesLocalStorageAdapter.getEntryFrom(this.root, path.slice(1).split('/'));
+    return NotesAdapter.getEntryFrom(root, path.slice(1).split('/'));
   }
 
   getFolder(path) {
@@ -147,9 +145,5 @@ export class NotesLocalStorageAdapter {
     folder.remove(entry);
 
     this.save();
-  }
-
-  save() {
-    window.localStorage.setItem('notes', JSON.stringify(this.root));
   }
 }
