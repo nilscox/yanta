@@ -74,7 +74,7 @@ export default {
   created() {
     this.debouncedTextChange = debounce(() => {
       this.saveNote(this.path, this.textValue);
-    }, 500);
+    }, 5000);
   },
   unmounted() {
     this.debouncedTextChange.cancel();

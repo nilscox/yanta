@@ -12,9 +12,6 @@ export class GoogleDriveAdapter extends NotesAdapter {
     this.fileId = undefined;
     this.fileMetadata = undefined;
     this.fileContent = undefined;
-
-    this.root = undefined;
-    this.root = new Folder({ name: '/', entries: [] });
   }
 
   async init() {
@@ -31,9 +28,27 @@ export class GoogleDriveAdapter extends NotesAdapter {
     await this.client.signOut();
   }
 
+  async save() {
+    console.log('save', this.fileId, this.root);
+    await this.client.updateFile(this.fileId, JSON.stringify(this.root));
+  }
+
   async sync() {
     if (!this.fileId) {
-      this.fileId = await this.client.getFileId('yanta.json');
+      const filesIds = await this.client.getFilesIds('yanta.json');
+
+      if (filesIds.length === 0) {
+        const file = await this.client.createFile('yanta.json', 'Yanta Filesystem', 'application/json');
+
+        this.fileId = file.id;
+        this.root = Folder.root();
+
+        await this.save();
+      } else if (filesIds.length === 1) {
+        this.fileId = filesIds[0];
+      } else {
+        throw new Error('expected to find one file');
+      }
     }
 
     if (!this.fileMetadata) {

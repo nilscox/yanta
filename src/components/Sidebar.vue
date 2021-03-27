@@ -14,7 +14,7 @@
         @blur="unpauseListeners"
       />
     </header>
-    <sidebar-folder :path="[]" :folder="rootFolder" :searching="Boolean(this.search)" />
+    <sidebar-folder v-if="rootFolder" :path="[]" :folder="rootFolder" :searching="Boolean(this.search)" />
   </aside>
 </template>
 
@@ -40,8 +40,13 @@ export default {
   },
   computed: {
     rootFolder() {
+      const root = this.getRootFolder();
+
+      if (!root)
+        return null;
+
       if (!this.search) {
-        return this.getRootFolder();
+        return root;
       }
 
       const emptyFolder = new Folder({ name: '/', entries: [] });
@@ -73,7 +78,7 @@ export default {
         return new Folder({ name: folder.name, entries }, folder.parent);
       };
 
-      return getFilteredNotes(this.getRootFolder()) || emptyFolder;
+      return getFilteredNotes(root) || emptyFolder;
     }
   },
   methods: {

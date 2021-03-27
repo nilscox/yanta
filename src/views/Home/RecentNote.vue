@@ -44,6 +44,8 @@ h2 {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
 }
 
 .markdown-github h1,

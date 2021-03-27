@@ -3,7 +3,8 @@ import Chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
-import { NotesLocalStorageAdapter } from './notes-local-storage-adapter.js';
+import Folder from '../models/folder';
+import { NotesAdapter } from './notes-adapter.js';
 
 process.env.TZ='utc';
 
@@ -35,29 +36,33 @@ const root = makeFolder('/', [
 
 const clone = (obj) => JSON.parse(JSON.stringify(obj));
 
-describe('NotesLocalStorageAdapter', () => {
+class Adapter extends NotesAdapter {
+  constructor() {
+    super();
+    this.root = new Folder(root, null);
+  };
+}
+
+describe('NotesAdapter', () => {
   let clock;
-  let setItem;
+  let adapter;
+  let save = sinon.fake();
 
   beforeEach(() => {
     clock = sinon.useFakeTimers({ now: new Date(2020, 0, 1) });
-    setItem = sinon.fake();
 
-    Object.defineProperty(window, 'localStorage', {
-      value: {
-        setItem,
-        getItem: () => JSON.stringify(root),
-      },
-    });
+    adapter = new Adapter();
+    adapter.init = sinon.fake();
+    adapter.teardown = sinon.fake();
+    adapter.save = () => save(clone(adapter.root));
   });
 
   afterEach(() => {
     clock.restore();
+    sinon.reset();
   });
 
   it('getFolder', () => {
-    const adapter = new NotesLocalStorageAdapter();
-
     expect(() => adapter.getFolder('')).to.throw('invalid path');
     expect(() => adapter.getFolder('foo.txt')).to.throw('invalid path');
     expect(() => adapter.getFolder('/foo.txt')).to.throw('folder does not exist');
@@ -70,8 +75,6 @@ describe('NotesLocalStorageAdapter', () => {
   });
 
   it('getNote', () => {
-    const adapter = new NotesLocalStorageAdapter();
-
     expect(() => adapter.getNote('')).to.throw('invalid path');
     expect(() => adapter.getNote('/foo.txt')).to.throw('note does not exist');
     expect(() => adapter.getNote('/archived')).to.throw('note does not exist');
@@ -82,7 +85,6 @@ describe('NotesLocalStorageAdapter', () => {
   });
 
   it('saveNote', () => {
-    const adapter = new NotesLocalStorageAdapter();
     const expected = clone(root);
 
     clock.tick(1000);
@@ -96,18 +98,19 @@ describe('NotesLocalStorageAdapter', () => {
       updated: '2020-01-01T00:00:01.000Z',
     });
 
-    expect(JSON.parse(setItem.args[0][1])).to.deep.eql(expected);
+    expect(save.callCount).to.eql(1);
+    expect(save.args[0][0]).to.deep.eql(expected);
 
     adapter.saveNote('/todo.txt', 'some new content');
 
     expected.entries[1].text = 'some new content';
     expected.entries[1].updated = '2020-01-01T00:00:01.000Z';
 
-    expect(JSON.parse(setItem.args[1][1])).to.deep.eql(expected);
+    expect(save.callCount).to.eql(2);
+    expect(save.args[1][0]).to.deep.eql(expected);
   });
 
   it('moveEntry', () => {
-    const adapter = new NotesLocalStorageAdapter();
     const expected = clone(root);
 
     expect(() => adapter.moveEntry('/foo.txt', '/list.md')).to.throw('source does not exist');
@@ -117,7 +120,8 @@ describe('NotesLocalStorageAdapter', () => {
 
     expected.entries[1].name = 'list.md';
 
-    expect(JSON.parse(setItem.args[0][1])).to.deep.eql(expected);
+    expect(save.callCount).to.eql(1);
+    expect(save.args[0][0]).to.deep.eql(expected);
 
     adapter.moveEntry('/list.md', '/archived/todo.hxx');
 
@@ -126,17 +130,18 @@ describe('NotesLocalStorageAdapter', () => {
     expected.entries[0].entries.push(note);
     note.name = 'todo.hxx';
 
-    expect(JSON.parse(setItem.args[1][1])).to.deep.eql(expected);
+    expect(save.callCount).to.eql(2);
+    expect(save.args[1][0]).to.deep.eql(expected);
 
     adapter.moveEntry('/archived', '/old');
 
     expected.entries[0].name = 'old';
 
-    expect(JSON.parse(setItem.args[2][1])).to.deep.eql(expected);
+    expect(save.callCount).to.eql(3);
+    expect(save.args[2][0]).to.deep.eql(expected);
   });
 
   it('deleteEntry', () => {
-    const adapter = new NotesLocalStorageAdapter();
     const expected = clone(root);
 
     expect(() => adapter.deleteEntry('')).to.throw('invalid path');
@@ -147,12 +152,14 @@ describe('NotesLocalStorageAdapter', () => {
 
     expected.entries.splice(1, 1);
 
-    expect(JSON.parse(setItem.args[0][1])).to.deep.eql(expected);
+    expect(save.callCount).to.eql(1);
+    expect(save.args[0][0]).to.deep.eql(expected);
 
     adapter.deleteEntry('/archived');
 
     expected.entries.splice(0, 1);
 
-    expect(JSON.parse(setItem.args[1][1])).to.deep.eql(expected);
+    expect(save.callCount).to.eql(2);
+    expect(save.args[1][0]).to.deep.eql(expected);
   });
 });

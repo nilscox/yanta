@@ -15,15 +15,13 @@ const splitFilePath = (path) => {
 
 export class NotesAdapter {
 
+  root = undefined;
+
   init() {
     throw new Error('not implemented');
   }
 
   teardown() {
-    throw new Error('not implemented');
-  }
-
-  getRootFolder() {
     throw new Error('not implemented');
   }
 
@@ -49,18 +47,20 @@ export class NotesAdapter {
     return NotesAdapter.getEntryFrom(entry, path.slice(1));
   };
 
+  getRootFolder() {
+    return this.root;
+  }
+
   getEntry(path) {
     if (!path.startsWith('/')) {
       throw new Error('invalid path');
     }
 
-    const root = this.getRootFolder();
-
     if (path === '/') {
-      return root;
+      return this.root;
     }
 
-    return NotesAdapter.getEntryFrom(root, path.slice(1).split('/'));
+    return NotesAdapter.getEntryFrom(this.root, path.slice(1).split('/'));
   }
 
   getFolder(path) {

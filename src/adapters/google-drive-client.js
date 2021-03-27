@@ -41,7 +41,7 @@ export class GoogleDriveClient {
     return gapi.auth2.getAuthInstance().signOut();
   }
 
-  async getFileId(name) {
+  async getFilesIds(name) {
     const listResponse = await gapi.client.drive.files.list({
       'pageSize': 10,
       'fields': "nextPageToken, files(id, name)",
@@ -50,16 +50,12 @@ export class GoogleDriveClient {
 
     const files = listResponse.result.files;
 
-    if (files.length !== 1) {
-      throw new Error('expected to find one file');
-    }
-
-    return files[0].id;
+    return files.map(({ id }) => id);
   }
 
   async getFileMetadata(fileId) {
     const response = await gapi.client.drive.files.get({
-      fileId: fileId,
+      fileId,
       fields: '*',
     });
 
@@ -68,10 +64,39 @@ export class GoogleDriveClient {
 
   async getFileContent(fileId) {
     const response = await gapi.client.drive.files.get({
-      fileId: fileId,
+      fileId,
       fields: '*',
       alt: 'media'
     });
+
+    return response.result;
+  }
+
+  async createFile(name, description, mimeType) {
+    const response = await gapi.client.drive.files.create({
+      description,
+      mimeType,
+      name,
+    });
+
+    return response.result;
+  }
+
+  async updateFile(fileId, content) {
+    const response = await gapi.client.request({
+      path: '/upload/drive/v3/files/' + fileId,
+      method: 'PATCH',
+      params: {
+        uploadType: 'media',
+      },
+      body: content,
+    });
+
+    return response.result;
+  }
+
+  async deleteFile(fileId) {
+    const response = await gapi.client.drive.files.delete({ fileId });
 
     return response.result;
   }

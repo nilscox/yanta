@@ -1,7 +1,6 @@
 <template>
-  <settings />
   <note v-if="newNote" path="/" :creating="true" />
-  <main v-if="false && !newNote">
+  <main v-if="!newNote">
     <h1>
       <span class="appname-chunk">yet</span>
       <span class="appname-chunk">another</span>
@@ -13,6 +12,7 @@
       <new-note />
       <recent-note v-for="note of recentNotes" :key="note.getPath()" :note="note" />
     </div>
+    <settings />
   </main>
 </template>
 

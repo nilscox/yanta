@@ -1,6 +1,7 @@
 <template>
   <div v-if="initialized" class="wrapper">
     <sidebar />
+    <settings />
     <router-view />
   </div>
 </template>
@@ -29,7 +30,10 @@ export default {
     IconButton,
   },
   data() {
-    const Adapter = adapters[localStorage.getItem('adapter') || 'LOCAL_STORAGE'];
+    const adapter = localStorage.getItem('adapter') || 'LOCAL_STORAGE';
+    const Adapter = adapters[adapter];
+
+    localStorage.setItem('adapter', adapter);
 
     return {
       adapter: new Adapter(data),

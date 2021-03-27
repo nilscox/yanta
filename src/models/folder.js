@@ -13,6 +13,10 @@ export default class Folder {
     });
   }
 
+  static root() {
+    return new Folder({ name: '/', entries: [] }, null);
+  }
+
   getPath() {
     if (!this.parent) {
       return '';

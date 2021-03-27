@@ -15,20 +15,13 @@ export class LocalStorageAdapter extends NotesAdapter {
     if (data) {
       this.root = new Folder(data, null);
     } else {
-      this.root = new Folder({
-        name: '/',
-        entries: [],
-      });
+      this.root = Folder.root();
     }
+
+    this.save();
   }
 
-  teardown() {
-    window.localStorage.removeItem('notes');
-  }
-
-  getRootFolder() {
-    return this.root;
-  }
+  teardown() {}
 
   save() {
     window.localStorage.setItem('notes', JSON.stringify(this.root));

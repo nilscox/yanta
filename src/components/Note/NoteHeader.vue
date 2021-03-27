@@ -121,6 +121,10 @@ export default {
     nameInputBlur() {
       this.editingName = false;
 
+      if (this.nameValue === '') {
+        return this.editName();
+      }
+
       if (this.path === this.nextPath) {
         return;
       }
