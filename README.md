@@ -4,7 +4,7 @@
 
 This project is not a real world application, and does not provide the features you would expect from a note taking app (such as data synchronization). It was just a pretext for me to learn Vue.js.
 
-The project is deployed [here](https://yanta.nils.cx), if you want to see what it looks like.
+The project is deployed [here](https://yanta.nilscox.dev), if you want to see what it looks like.
 
 **Start the project**
 
